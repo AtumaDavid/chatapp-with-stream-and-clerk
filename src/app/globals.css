@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*  css file for stream react components */
+@import "~stream-chat-react/dist/css/v2/index.css";
+
+.str-chat {
+  --str-chat__primary-color: theme(colors.blue.500);
+  --str-chat__active-primary-color: theme(colors.blue.600);
+  --str-chat__disabled-color: theme(colors.gray.200)
+  --str-chat__border-radius-circle: 6px;
+}
