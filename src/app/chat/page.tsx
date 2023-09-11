@@ -1,19 +1,13 @@
 "use client";
-import { UserButton, useUser } from "@clerk/nextjs";
-import React from "react";
-import { StreamChat } from "stream-chat";
-import {
-  Channel,
-  ChannelHeader,
-  ChannelList,
-  Chat,
-  LoadingIndicator,
-  MessageInput,
-  MessageList,
-  Thread,
-  Window,
-} from "stream-chat-react";
+import { useUser } from "@clerk/nextjs";
+import { Chat, LoadingIndicator } from "stream-chat-react";
+import ChatChannel from "./ChatChannel";
+import ChatSidebar from "./ChatSidebar";
 import useInitializeChatClient from "./useInitializeChatClient";
+import { useCallback, useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+import useWindowSize from "../hooks/useWindowSize";
+import { mdBreakpoint } from "@/utils/tailwind";
 
 // const userID = "user_2V7qZyxNskgUj7JNX9vjIGRC04s";
 
@@ -37,6 +31,21 @@ export default function ChatPage() {
   const chatClient = useInitializeChatClient();
   const { user } = useUser();
 
+  const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
+
+  const windowSize = useWindowSize();
+  const isLargeScreen = windowSize.width >= mdBreakpoint;
+
+  //tracks windows size to determine if its large screen
+  useEffect(() => {
+    if (windowSize.width >= mdBreakpoint) setChatSidebarOpen(false);
+  }, [windowSize.width]);
+
+  //The handleSidebarOnClose function is a callback to close the chat sidebar.
+  const handleSidebarOnClose = useCallback(() => {
+    setChatSidebarOpen(false);
+  }, []);
+
   // If the chat client or user is not available, show a loading indicator
   if (!chatClient || !user) {
     return (
@@ -47,29 +56,34 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen">
-      {/* this is the chat page <UserButton afterSignOutUrl="/" /> */}
-      <Chat client={chatClient}>
-        <div className="flex h-full flex-row">
-          <div className="max-w-[360px w-full">
-            <ChannelList
-              filters={{ type: "messaging", members: { $in: [user.id] } }}
-              sort={{ last_message: -1 }}
-              options={{ state: true, presence: true, limit: 10 }}
+    <div className="h-screen bg-gray-100 xl:px-20 xl:py-8">
+      <div className="m-auto flex h-full min-w-[350px] max-w-[1600px] flex-col shadow-sm">
+        {/* this is the chat page <UserButton afterSignOutUrl="/" /> */}
+        <Chat client={chatClient}>
+          <div className="flex justify-center border-b border-b-[#DBDDE1] p-3 md:hidden">
+            <button onClick={() => setChatSidebarOpen(!chatSidebarOpen)}>
+              {!chatSidebarOpen ? (
+                <span className="flex items-center gap-1">
+                  <Menu /> Menu
+                </span>
+              ) : (
+                <X />
+              )}
+            </button>
+          </div>
+          <div className="flex h-full flex-row overflow-y-auto">
+            <ChatSidebar
+              user={user}
+              show={isLargeScreen || chatSidebarOpen} //if isLargeScreen is true or chatSidebarOpen is true, then the ChatSidebar should be shown.
+              onClose={handleSidebarOnClose}
+            />
+            <ChatChannel
+              show={isLargeScreen || !chatSidebarOpen} //if isLargeScreen is true or chatSidebarOpen is false, then the ChatChannel should be shown.
+              hideChannelOnThread={!isLargeScreen} //if isLargeScreen is false, the chat channel should be hidden when a message thread is active.
             />
           </div>
-          <div className="h-full w-full">
-            <Channel>
-              <Window>
-                <ChannelHeader />
-                <MessageList />
-                <MessageInput />
-              </Window>
-              <Thread />
-            </Channel>
-          </div>
-        </div>
-      </Chat>
+        </Chat>
+      </div>
     </div>
   );
 }

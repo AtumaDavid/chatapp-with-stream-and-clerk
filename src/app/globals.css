@@ -11,3 +11,9 @@
   --str-chat__disabled-color: theme(colors.gray.200)
   --str-chat__border-radius-circle: 6px;
 }
+
+
+/* Search box height glitch fix */
+.str-chat__channel-search.str-chat__channel-search--with-results.str-chat__channel-search--inline {
+  height: fit-content;
+}
