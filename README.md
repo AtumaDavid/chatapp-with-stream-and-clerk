@@ -68,7 +68,7 @@ plugins: ["prettier-plugin-tailwindcss"],
   - In summary, the code sets up a chat interface using the Stream Chat API, authenticates users, generates tokens for user authentication, and handles environment variable configuration.
   - The ChatPage component (/chat/page.tsx) is the main chat interface, the useInitializeChatClient hook(/chat/useInitializeChatClients.ts) initializes the chat client and handles user authentication, the GET function generates tokens (/api/get-token/route.ts), and env(env.ts) manages environment variables.
 
-# ChatPage.js:
+# ChatPage.tsx:
 
 - ChatPage.js is the main chat page component.
 - It initializes the chat client using the useInitializeChatClient hook and fetches the user with useUser. (**use authentication and token generation**)
@@ -78,13 +78,13 @@ plugins: ["prettier-plugin-tailwindcss"],
 - If the chat client or user is not available, it displays a loading indicator.
 - It renders a chat interface including a menu button for mobile devices.
 
-# MenuBar.js
+# MenuBar.tsx
 
 - MenuBar.js defines a component representing a menu bar.
 - It includes a user button (possibly for user actions) and an icon to show users.
 - The component is styled with CSS classes to control its appearance.
 
-# ChatSidebar.js
+# ChatSidebar.tsx
 
 - ChatSidebar.js defines a component for the chat sidebar.
 - It includes the MenuBar component at the top.
@@ -92,7 +92,7 @@ plugins: ["prettier-plugin-tailwindcss"],
 - It uses a custom ChannelPreviewCustom component for rendering channel previews with custom behavior.
 - The onClose function is called when a channel is selected to close the sidebar.
 
-# ChatChannel.js
+# ChatChannel.tsx
 
 - ChatChannel.js defines a component for the main chat channel.
 - It includes a Channel component that contains the chat interface elements.
