@@ -2,12 +2,13 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import ThemeProvider from "./ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My Chat",
-  description: "Live chat app built with stream and clerk",
+  title: "Flow Chat",
+  description: "A live chat app built with Stream and Clerk",
 };
 
 export default function RootLayout({
@@ -16,12 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <ClerkProvider>
+    <ClerkProvider>
+      <html lang="en">
         <body className={inter.className}>
-          <main>{children}</main>
+          <ThemeProvider>
+            <main>{children}</main>
+          </ThemeProvider>
         </body>
-      </ClerkProvider>
-    </html>
+      </html>
+    </ClerkProvider>
   );
 }

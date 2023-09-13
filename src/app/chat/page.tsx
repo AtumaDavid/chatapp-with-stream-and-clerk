@@ -1,52 +1,89 @@
 "use client";
+
+import useWindowSize from "@/app/hooks/useWindowSize";
+import {
+  getCurrentPushSubscription,
+  sendPushSubscriptionToServer,
+} from "@/notifications/pushService";
+import { registerServiceWorker } from "@/utils/serviceWorker";
+import { mdBreakpoint } from "@/utils/tailwind";
 import { useUser } from "@clerk/nextjs";
-import { Chat, LoadingIndicator } from "stream-chat-react";
+import { Menu, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Chat, LoadingIndicator, Streami18n } from "stream-chat-react";
+import { useTheme } from "../ThemeProvider";
 import ChatChannel from "./ChatChannel";
 import ChatSidebar from "./ChatSidebar";
+import PushMessageListener from "./PushMessageListener";
 import useInitializeChatClient from "./useInitializeChatClient";
-import { useCallback, useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
-import useWindowSize from "../hooks/useWindowSize";
-import { mdBreakpoint } from "@/utils/tailwind";
 
-// const userID = "user_2V7qZyxNskgUj7JNX9vjIGRC04s";
+interface ChatPageProps {
+  searchParams: { channelId?: string };
+}
 
-// const chatClient = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!);
+//
+const i18Instance = new Streami18n({ language: "en" });
 
-// chatClient.connectUser(
-//   {
-//     id: userID,
-//     name: "Atuma David",
-//   },
-//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidXNlcl8yVjdxWnl4TnNrZ1VqN0pOWDl2aklHUkMwNHMifQ.z8KnFKywVcyWmo-Mj3NkdOV2ZS7g7m91opNQy5052wo"
-// );
-
-// const channel = chatClient.channel("messaging", "channel_1", {
-//   name: "channel #1",
-//   members: [userID],
-// });
-
-export default function ChatPage() {
-  // Initialize the chat client and get the current user
+export default function ChatPage({
+  searchParams: { channelId },
+}: ChatPageProps) {
+  // Initialize the chat client using a custom hook.
   const chatClient = useInitializeChatClient();
+
+  // Get user information using the useUser hook.
   const { user } = useUser();
 
+  // Get the current theme using a custom hook.
+  const { theme } = useTheme();
+
+  // State to control the visibility of the chat sidebar.
   const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
 
+  // Get the window size using a custom hook.
   const windowSize = useWindowSize();
   const isLargeScreen = windowSize.width >= mdBreakpoint;
 
-  //tracks windows size to determine if its large screen
   useEffect(() => {
     if (windowSize.width >= mdBreakpoint) setChatSidebarOpen(false);
   }, [windowSize.width]);
 
-  //The handleSidebarOnClose function is a callback to close the chat sidebar.
+  // Set up the service worker for push notifications.
+  useEffect(() => {
+    async function setUpServiceWorker() {
+      try {
+        await registerServiceWorker();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    setUpServiceWorker();
+  }, []);
+
+  // Synchronize the push subscription with the server.
+  useEffect(() => {
+    async function syncPushSubscription() {
+      try {
+        const subscription = await getCurrentPushSubscription();
+        if (subscription) {
+          await sendPushSubscriptionToServer(subscription);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    syncPushSubscription();
+  }, []);
+
+  useEffect(() => {
+    if (channelId) {
+      history.replaceState(null, "", "/chat");
+    }
+  }, [channelId]);
+
   const handleSidebarOnClose = useCallback(() => {
     setChatSidebarOpen(false);
   }, []);
 
-  // If the chat client or user is not available, show a loading indicator
   if (!chatClient || !user) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100 dark:bg-black">
@@ -56,10 +93,15 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen bg-gray-100 xl:px-20 xl:py-8">
+    <div className="h-screen bg-gray-100 text-black dark:bg-black dark:text-white xl:px-20 xl:py-8">
       <div className="m-auto flex h-full min-w-[350px] max-w-[1600px] flex-col shadow-sm">
-        {/* this is the chat page <UserButton afterSignOutUrl="/" /> */}
-        <Chat client={chatClient}>
+        <Chat
+          client={chatClient}
+          i18nInstance={i18Instance}
+          theme={
+            theme === "dark" ? "str-chat__theme-dark" : "str-chat__theme-light"
+          }
+        >
           <div className="flex justify-center border-b border-b-[#DBDDE1] p-3 md:hidden">
             <button onClick={() => setChatSidebarOpen(!chatSidebarOpen)}>
               {!chatSidebarOpen ? (
@@ -74,14 +116,16 @@ export default function ChatPage() {
           <div className="flex h-full flex-row overflow-y-auto">
             <ChatSidebar
               user={user}
-              show={isLargeScreen || chatSidebarOpen} //if isLargeScreen is true or chatSidebarOpen is true, then the ChatSidebar should be shown.
+              show={isLargeScreen || chatSidebarOpen}
               onClose={handleSidebarOnClose}
+              customActiveChannel={channelId}
             />
             <ChatChannel
-              show={isLargeScreen || !chatSidebarOpen} //if isLargeScreen is true or chatSidebarOpen is false, then the ChatChannel should be shown.
-              hideChannelOnThread={!isLargeScreen} //if isLargeScreen is false, the chat channel should be hidden when a message thread is active.
+              show={isLargeScreen || !chatSidebarOpen}
+              hideChannelOnThread={!isLargeScreen}
             />
           </div>
+          <PushMessageListener />
         </Chat>
       </div>
     </div>
