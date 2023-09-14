@@ -118,16 +118,42 @@ plugins: ["prettier-plugin-tailwindcss"],
 
    - It includes a `PushMessageListener` component, which suggests it handles incoming push messages.
 
-# MenuBar.tsx
+# MenuBar.tsx and ChatSidebar.tsx
 
-- MenuBar.js defines a component representing a menu bar.
-- It includes a user button (possibly for user actions) and an icon to show users.
-- The component is styled with CSS classes to control its appearance.
+- `ChatSidebar.tsx` uses components and functionality defined in `Menubar.tsx` (`MenuBar`, `ThemeToggleButton`, `PushSubscriptionToggleButton`, and `useTheme`) to build a chat sidebar with various features and user interactions. `Menubar.tsx` provides user interface elements and functionality that enhance the chat sidebar's capabilities.
+
+# MenuBar.tsx:
+
+1. **MenuBar Component**:
+
+   - The `MenuBar` component is defined as a functional component that receives the `onUserMenuClick` (`ChatSidebar.tsx`) callback as a prop. It also uses the `useTheme` hook to determine the current theme.
+   - A `UserButton` component that handles user authentication and sign-out.
+   - Components for push notification toggling (`PushSubscriptionToggleButton`), user menu (`Users`), and theme switching (`ThemeToggleButton`).
+
+2. **ThemeToggleButton Component**:
+
+   - This is a separate functional component responsible for rendering the theme toggle button (light/dark theme switch).
+   - It uses the `useTheme` hook to access the current theme and allows users to switch between light and dark themes by clicking on the moon (dark) or sun (light) icons.
+   -
+
+3. **PushSubscriptionToggleButton Component**:
+
+   - This component handles push notification toggling.
+   - It maintains state variables to track the loading status, active push subscriptions, and confirmation messages related to enabling/disabling push notifications.
+   - The component fetches the current push subscription when it mounts and provides buttons (BellOff and BellRing) for enabling and disabling push notifications. The appearance of these buttons can change based on the loading state and whether push notifications are currently enabled.
+   - When push notifications are enabled, a bell icon with a "disable" action is displayed.
+   - When push notifications are disabled, a bell icon with an "enable" action is displayed.
+   - Additionally, this component uses the `DisappearingMessage` component to display confirmation messages that disappear after a while.
 
 # ChatSidebar.tsx
 
 - ChatSidebar.js defines a component for the chat sidebar.
-- It includes the MenuBar component at the top.
+- It receives the props specified in the `ChatSidebarProps` interface (`user`: "A user resource object representing the currently logged-in user."
+  `show`: "A boolean indicating whether the sidebar should be displayed or hidden."
+  `onClose`: "A callback function to be executed when the sidebar is closed."
+  `customActiveChannel`: "An optional string representing a custom active channel."). Inside the component.
+- A `useEffect` hook is used to monitor changes to the show prop. If show becomes false, it sets `usersMenuOpen` to false, effectively closing the user menu.
+- A custom `ChannelPreviewCustom` component is defined using the `useCallback` hook. This component is a modification of `ChannelPreviewMessenger` and has custom behavior when a channel is selected. It calls the `onClose` callback and sets the active channel when a channel is selected.
 - The ChannelList component displays a list of chat channels filtered by the user's ID.
 - It uses a custom ChannelPreviewCustom component for rendering channel previews with custom behavior.
 - The onClose function is called when a channel is selected to close the sidebar.

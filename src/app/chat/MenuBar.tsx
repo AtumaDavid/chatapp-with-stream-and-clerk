@@ -40,6 +40,7 @@ function ThemeToggleButton() {
 
   if (theme === "dark") {
     return (
+      // Render a button to enable the light theme
       <span title="Enable light theme">
         <Moon className="cursor-pointer" onClick={() => setTheme("light")} />
       </span>
@@ -47,6 +48,7 @@ function ThemeToggleButton() {
   }
 
   return (
+    // Render a button to enable the dark theme
     <span title="Enable dark theme">
       <Sun className="cursor-pointer" onClick={() => setTheme("dark")} />
     </span>
@@ -62,6 +64,7 @@ function PushSubscriptionToggleButton() {
   const [confirmationMessage, setConfirmationMessage] = useState<string>();
 
   useEffect(() => {
+    // Use effect to fetch the current push subscription status when the component mounts
     async function getActivePushSubscription() {
       const subscription = await getCurrentPushSubscription();
       setHasActivePushSubscription(!!subscription);
@@ -70,7 +73,7 @@ function PushSubscriptionToggleButton() {
   }, []);
 
   async function setPushNotificationsEnabled(enabled: boolean) {
-    if (loading) return;
+    if (loading) return; // Prevent multiple requests if already loading
     setLoading(true);
     setConfirmationMessage(undefined);
 
@@ -98,6 +101,7 @@ function PushSubscriptionToggleButton() {
 
   if (hasActivePushSubscription === undefined) return null;
 
+  // Render a button to toggle push notifications based on the current state
   return (
     <div className="relative">
       {loading && (
