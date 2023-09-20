@@ -63,10 +63,10 @@ plugins: ["prettier-plugin-tailwindcss"],
 
   **use authentication and token generation**
 
-  - /api/get-token/route.ts(GET function to generate token), /chat/page.tsx (main chat interface), /chat/useInitializeChatClients.ts (custom hook), env.ts
+  - `/api/get-token/route.ts`(`GET` function to generate token), `/chat/page.tsx` (main chat interface),` /chat/useInitializeChatClients.ts` (custom hook),` env.ts`
 
   - In summary, the code sets up a chat interface using the Stream Chat API, authenticates users, generates tokens for user authentication, and handles environment variable configuration.
-  - The ChatPage component (/chat/page.tsx) is the main chat interface, the useInitializeChatClient hook(/chat/useInitializeChatClients.ts) initializes the chat client and handles user authentication, the GET function generates tokens (/api/get-token/route.ts), and env(env.ts) manages environment variables.
+  - The `ChatPage` component (`/chat/page.tsx`) is the main chat interface, the `useInitializeChatClient` hook(`/chat/useInitializeChatClients.ts`) initializes the chat client and handles user authentication, the `GET` function generates tokens (`/api/get-token/route.ts`), and env(`env.ts`) manages environment variables.
 
 # ChatPage.tsx:
 
@@ -95,20 +95,20 @@ plugins: ["prettier-plugin-tailwindcss"],
    - The two useEffect (`setUpServiceWorker` and `syncPushSubscription`) blocks are responsible for setting up the service worker for push notifications and ensuring that the push subscription is synchronized with the server. This allows the chat application to deliver push notifications to users effectively. The setup and synchronization processes occur when the component is initially mounted.
 
    - The `setUpServiceWorker` function is defined and called immediately when the component is mounted.
-   - When ` setUpServiceWorker` is called, it internally invokes `registerServiceWorker()` (from "utils/serviceWorker.ts"), which attempts to register the service worker script located at "utils/serviceWorker.ts".
+   - When ` setUpServiceWorker` is called, it internally invokes `registerServiceWorker()` (from `"utils/serviceWorker.ts"`), which attempts to register the service worker script located at `"utils/serviceWorker.ts"`.
    - If the registration is successful, it enables the service worker to handle tasks such as push notifications.
 
    - The `syncPushSubscription` function is used to synchronize the user's push notification subscription with the server.
-   - It attempts to retrieve the current push notification subscription using the getCurrentPushSubscription function. This subscription likely includes information necessary for sending push notifications to the user.
-   - It first calls `getCurrentPushSubscription` (from "@/notifications/pushService"), which retrieves the current push notification subscription. If a subscription exists, it then calls `sendPushSubscriptionToServer` (from "@/notifications/pushService") to send the subscription details to the server.
+   - It attempts to retrieve the current push notification subscription using the `getCurrentPushSubscription` function. This subscription includes information necessary for sending push notifications to the user.
+   - It first calls `getCurrentPushSubscription` (from `"@/notifications/pushService"`), which retrieves the current push notification subscription. If a subscription exists, it then calls `sendPushSubscriptionToServer` (from `"@/notifications/pushService"`) to send the subscription details to the server.
 
 7. **Routing**:
 
-   - This useEffect (`channelID`) listens to changes in the "channelId variable". When `channelId` becomes truthy (i.e., when a specific channel is selected), it modifies the browser's URL to "/chat" using the `history.replaceState` method. This can be useful for updating the URL and the browser's history without causing a full page reload when navigating to a chat channel.
+   - This useEffect (`channelID`) listens to changes in the "channelId variable". When `channelId` becomes truthy (i.e., when a specific channel is selected), it modifies the browser's URL to `"/chat"` using the `history.replaceState` method. This can be useful for updating the URL and the browser's history without causing a full page reload when navigating to a chat channel.
 
 8. **UI Rendering**:
 
-   - If the chat client or user is not available (possibly due to authentication or initialization), it renders a loading indicator.
+   - If the chat client or user is not available (maybe due to authentication or initialization), it renders a loading indicator.
 
    - It renders the main chat interface, including components for chat channels and the chat sidebar.
 
@@ -154,14 +154,36 @@ plugins: ["prettier-plugin-tailwindcss"],
   `customActiveChannel`: "An optional string representing a custom active channel."). Inside the component.
 - A `useEffect` hook is used to monitor changes to the show prop. If show becomes false, it sets `usersMenuOpen` to false, effectively closing the user menu.
 - A custom `ChannelPreviewCustom` component is defined using the `useCallback` hook. This component is a modification of `ChannelPreviewMessenger` and has custom behavior when a channel is selected. It calls the `onClose` callback and sets the active channel when a channel is selected.
-- The ChannelList component displays a list of chat channels filtered by the user's ID.
-- It uses a custom ChannelPreviewCustom component for rendering channel previews with custom behavior.
+- The `ChannelList` component displays a list of chat channels filtered by the user's ID.
+- It uses a custom `ChannelPreviewCustom` component for rendering channel previews with custom behavior.
 - The onClose function is called when a channel is selected to close the sidebar.
 
 # ChatChannel.tsx
 
 - ChatChannel.js defines a component for the main chat channel.
 - It includes a Channel component that contains the chat interface elements.
-- The ChannelHeader, MessageList, and MessageInput components are used to display and interact with chat messages.
-- The Thread component is used to view message threads.
-- The component's visibility is controlled by the show prop, and it hides the channel when a thread is active based on the hideChannelOnThread prop.
+- The `ChannelHeader`, `MessageList`, and `MessageInput` components are used to display and interact with chat messages.
+- The `Thread` component is used to view message threads.
+- The component's visibility is controlled by the `show` prop, and it hides the channel when a thread is active based on the `hideChannelOnThread` prop.
+
+# CustomChannelHeader.tsx
+
+- The `CustomChannelHeader` is a component that provides a customized header for a chat channel.
+- `CustomChannelHeader.tsx` defines two components, `CustomChannelHeader` and `ChannelNotificationToggleButton`, which are used to customize the header of the chat channel in the chat application.
+
+1. **CustomChannelHeader Component**:
+
+- This is the main component responsible for rendering the custom channel header.
+- Inside the component, it uses the `useUser` hook from Clerk to get information about the currently logged-in user.
+- It then uses the `useChannelStateContext` hook from Stream Chat to access the current channel's id.
+- The component renders a 'div' with a flex layout containing the default `ChannelHeader` component provided by Stream Chat (using the spread operator ...props to pass down its props).
+- The `ChannelNotificationToggleButton` component, which is conditionally rendered based on whether there is a user and a channel ID available.
+
+2. **ChannelNotificationToggleButton Component**
+
+- This is responsible for rendering the button to mute/unmute channel notifications.
+- It takes user and `channelId` as props.
+- It uses the `useChannelActionContext` hook from Stream Chat to access the `addNotification` function, which can be used to display notifications to the user.
+- It checks whether the current channel is muted for the logged-in user by examining the user's metadata.
+- It defines an async function called `setChannelMuted` that can be called to toggle the channel's notification status. This function updates the user's metadata and displays a notification based on the result.
+- The component renders an icon (either BellOff or Bell) based on whether the channel is muted or not. Clicking on the icon calls the `setChannelMuted` function accordingly.

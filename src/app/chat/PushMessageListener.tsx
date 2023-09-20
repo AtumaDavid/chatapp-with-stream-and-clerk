@@ -1,3 +1,4 @@
+// handles incoming push messages
 import { useEffect } from "react";
 import { useChatContext } from "stream-chat-react";
 
